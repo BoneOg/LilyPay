@@ -2,34 +2,39 @@ import "./global.css";
 import { StatusBar } from 'expo-status-bar';
 import { View, Text } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { databaseService, User } from './services/database';
-import { LoginScreen } from './screens/LoginScreen';
-import { AdminDashboard } from './screens/admin/AdminDashboard';
-import { CashierDashboard } from './screens/cashier/CashierDashboard';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './src/screens/LoginScreen';
+import { AdminDashboard } from './src/screens/admin/AdminDashboard';
+import CashierNavigator from './src/navigation/CashierNavigator';
+import * as Font from 'expo-font';
+import AppLoading from 'expo-app-loading';
+import { theme } from './src/components/theme';
+
+const customFonts = {
+  'Quicksand-Bold': require('./assets/fonts/Quicksand-Bold.ttf'),
+  'Quicksand-Light': require('./assets/fonts/Quicksand-Light.ttf'),
+  'Quicksand-Medium': require('./assets/fonts/Quicksand-Medium.ttf'),
+  'Quicksand-Regular': require('./assets/fonts/Quicksand-Regular.ttf'),
+  'Quicksand-SemiBold': require('./assets/fonts/Quicksand-SemiBold.ttf'),
+};
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [dbInitialized, setDbInitialized] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
 
   useEffect(() => {
-    initializeApp();
+    loadFonts();
   }, []);
 
-  const initializeApp = async () => {
-    try {
-      setIsLoading(true);
-      await databaseService.initDatabase();
-      setDbInitialized(true);
-      console.log('App initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize app:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const loadFonts = async () => {
+    await Font.loadAsync(customFonts);
+    setFontsLoaded(true);
   };
 
-  const handleLogin = (user: User) => {
+  const handleLogin = (user: any) => {
     setCurrentUser(user);
   };
 
@@ -37,35 +42,8 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  const renderDashboard = () => {
-    if (!currentUser) return null;
-
-    switch (currentUser.role) {
-      case 'admin':
-        return <AdminDashboard user={currentUser} onLogout={handleLogout} />;
-      case 'cashier':
-        return <CashierDashboard user={currentUser} onLogout={handleLogout} />;
-      default:
-        return <CashierDashboard user={currentUser} onLogout={handleLogout} />;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
-        <Text className="text-2xl font-bold text-gray-900 mb-4">LilyPay</Text>
-        <Text className="text-gray-600 text-lg">Initializing database...</Text>
-      </View>
-    );
-  }
-
-  if (!dbInitialized) {
-    return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
-        <Text className="text-2xl font-bold text-gray-900 mb-4">LilyPay</Text>
-        <Text className="text-red-600 text-lg">Failed to initialize database</Text>
-      </View>
-    );
+  if (!fontsLoaded) {
+    return <AppLoading />;
   }
 
   if (!currentUser) {
@@ -73,9 +51,18 @@ export default function App() {
   }
 
   return (
-    <>
-      {renderDashboard()}
-      <StatusBar style="auto" />
-    </>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {currentUser.role === 'admin' ? (
+          <Stack.Screen name="AdminDashboard">
+            {(props) => <AdminDashboard user={currentUser} onLogout={handleLogout} />}
+          </Stack.Screen>
+        ) : (
+          <Stack.Screen name="CashierNavigator">
+            {(props) => <CashierNavigator user={currentUser} onLogout={handleLogout} />}
+          </Stack.Screen>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

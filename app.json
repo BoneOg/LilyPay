@@ -2,6 +2,7 @@
   "expo": {
     "name": "LilyPay",
     "slug": "LilyPay",
+    "owner": "boneog",
     "version": "1.0.0",
     "orientation": "landscape",
     "userInterfaceStyle": "light",
@@ -16,7 +17,19 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-sqlite"
-    ]
+      "expo-sqlite",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7408ded5-eaa2-4abe-9b92-3df900ce60c9"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7408ded5-eaa2-4abe-9b92-3df900ce60c9"
+    }
   }
 }
