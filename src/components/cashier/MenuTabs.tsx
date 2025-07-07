@@ -1,28 +1,50 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { ShoppingCart } from 'react-native-feather';
+import { ShoppingCart } from 'lucide-react-native';
 import { getColor, getBorderRadius, getContainerStyles, getShadowStyles, getBorderStyles, theme } from '../../components/theme';
 import Tabs, { TabItem, TabsContent } from '../ui/Tabs';
 import FoodMenu from './FoodMenu';
+import Cart from './Cart';
+import { useFoodList } from '../../hooks/FoodList';
+
+interface CartItem {
+  code: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
 
 interface MenuTabsProps {
   activeTab: 'breakfast' | 'lunch' | 'dinner' | 'cart';
   activeSubTab: 'appetizer' | 'main-course' | 'desserts' | 'drinks';
   cartCount: number;
+  cartItems: CartItem[];
+  totalPaid: number;
   onTabChange: (tabId: string) => void;
   onSubTabChange: (subTabId: string) => void;
   onFoodSelect?: (food: any) => void;
+  onUpdateQuantity: (itemCode: string, newQuantity: number) => void;
+  onRemoveItem: (itemCode: string) => void;
+  onConfirmOrder: () => void;
+  onEnterAmountReceived: () => void;
 }
 
 const MenuTabs: React.FC<MenuTabsProps> = ({
   activeTab,
   activeSubTab,
   cartCount,
+  cartItems,
+  totalPaid,
   onTabChange,
   onSubTabChange,
   onFoodSelect,
+  onUpdateQuantity,
+  onRemoveItem,
+  onConfirmOrder,
+  onEnterAmountReceived,
 }) => {
   const containerStyles = getContainerStyles();
+  const { getFoodItems } = useFoodList();
 
   // Define main tab items
   const tabItems: TabItem[] = [
@@ -31,13 +53,12 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
     { id: 'dinner', label: 'Dinner' },
     { 
       id: 'cart', 
-      label: 'Cart', 
+      label: `Cart (${cartCount})`, 
       icon: <ShoppingCart 
         width={18} 
         height={18} 
         color={activeTab === 'cart' ? getColor('foreground') : getColor('muted-foreground')} 
-      />,
-      badge: cartCount 
+      />
     },
   ];
 
@@ -48,29 +69,6 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
     { id: 'desserts', label: 'Desserts' },
     { id: 'drinks', label: 'Drinks' },
   ];
-
-  // Sample food data - you can replace this with your actual data
-  const getFoodItems = (menuType: string, category: string) => {
-    const baseItems = [
-      { code: 'BO1', name: 'Waffle Pancake', price: 150 },
-      { code: 'BO2', name: 'French Toast', price: 120 },
-      { code: 'BO3', name: 'Scrambled Eggs', price: 80 },
-      { code: 'BO4', name: 'Bacon & Eggs', price: 200 },
-      { code: 'BO5', name: 'Oatmeal Bowl', price: 90 },
-      { code: 'BO6', name: 'Fruit Salad', price: 110 },
-    ];
-    
-    // Add more items for demonstration
-    const extendedItems = [
-      ...baseItems,
-      { code: 'BO7', name: 'Pancake Stack', price: 180 },
-      { code: 'BO8', name: 'Breakfast Burrito', price: 160 },
-      { code: 'BO9', name: 'Avocado Toast', price: 140 },
-      { code: 'BO10', name: 'Smoothie Bowl', price: 130 },
-    ];
-    
-    return extendedItems;
-  };
 
   const renderMenuContent = (menuType: string) => (
     <View style={{ flex: 1 }}>
@@ -86,7 +84,7 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
       {/* Food Menu Grid */}
       <View style={{ flex: 1, marginTop: 16 }}>
         <FoodMenu
-          foodItems={getFoodItems(menuType, activeSubTab)}
+          foodItems={getFoodItems(menuType as 'breakfast' | 'lunch' | 'dinner', activeSubTab)}
           onFoodSelect={onFoodSelect}
         />
       </View>
@@ -100,7 +98,7 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
       borderRadius: getBorderRadius('lg'),
       paddingHorizontal: containerStyles.paddingHorizontal, 
       paddingTop: 20, 
-      marginTop: 20,
+      marginTop: 8,
       ...getShadowStyles('sm'), 
       ...getBorderStyles('sm', 'border'),
     }}>
@@ -115,35 +113,27 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
 
       {/* Tab Content with Sub-tabs */}
       <TabsContent activeTab={activeTab} tabId="breakfast">
-        {renderMenuContent('Breakfast')}
+        {renderMenuContent('breakfast')}
       </TabsContent>
 
       <TabsContent activeTab={activeTab} tabId="lunch">
-        {renderMenuContent('Lunch')}
+        {renderMenuContent('lunch')}
       </TabsContent>
 
       <TabsContent activeTab={activeTab} tabId="dinner">
-        {renderMenuContent('Dinner')}
+        {renderMenuContent('dinner')}
       </TabsContent>
 
       <TabsContent activeTab={activeTab} tabId="cart">
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{
-            fontSize: 24, 
-            fontFamily: theme.fonts.semibold,
-            color: getColor('foreground'), 
-            marginBottom: 8,
-          }}>
-            Shopping Cart
-          </Text>
-          <Text style={{
-            fontSize: 16, 
-            fontFamily: theme.fonts.regular,
-            color: getColor('muted-foreground'), 
-            textAlign: 'center',
-          }}>
-            This is where your cart management will go
-          </Text>
+        <View style={{ flex: 1, marginTop: 16 }}>
+          <Cart 
+            cartItems={cartItems}
+            onUpdateQuantity={onUpdateQuantity}
+            onRemoveItem={onRemoveItem}
+            onConfirmOrder={onConfirmOrder}
+            onEnterAmountReceived={onEnterAmountReceived}
+            totalPaid={totalPaid}
+          />
         </View>
       </TabsContent>
     </View>

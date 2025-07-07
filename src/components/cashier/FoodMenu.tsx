@@ -38,44 +38,67 @@ const FoodMenu: React.FC<FoodMenuProps> = ({
         key={food.code}
         onPress={() => onFoodSelect?.(food)}
         style={{
-          marginBottom: 8,
           marginRight: isLastInRow ? 0 : gap,
           width: cardWidth,
         }}
       >
-        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ 
+          height: '100%', 
+          position: 'relative',
+          padding: 2,
+        }}>
+          {/* Food Code - Fixed at top */}
           <Text style={{
-            fontSize: 20,
+            fontSize: 32,
             fontFamily: theme.fonts.bold,
             color: getColor('foreground'),
-            marginBottom: 4,
+            textAlign: 'center',
+            marginTop: 1,
           }}>
             {food.code}
           </Text>
+          
+          {/* Food Name - Fixed in middle */}
           <Text style={{
             fontSize: 12,
             fontFamily: theme.fonts.medium,
             color: getColor('muted-foreground'),
             textAlign: 'center',
-            marginBottom: 6,
-            maxWidth: 80,
+            maxWidth: '100%',
+            paddingHorizontal: 4,
+            marginTop: 2,
           }}>
             {food.name}
           </Text>
+          
+          {/* Price Badge - Fixed width for 5 digits + peso sign */}
           <View style={{
-            backgroundColor: getColor('accent2.500'),
-            borderRadius: getBorderRadius('sm'),
-            paddingHorizontal: 8,
-            paddingVertical: 4,
-            ...getShadowStyles('sm'),
+            position: 'absolute',
+            bottom: 4,
+            left: 0,
+            right: 0,
+            alignItems: 'center', // Centers the badge horizontally
           }}>
+            <View style={{
+              backgroundColor: getColor('accent2.500'),
+              borderRadius: getBorderRadius('sm'),
+              paddingVertical: 4,
+              paddingHorizontal: 8,
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 70, // Fixed width instead of minWidth
+              marginBottom: 10,
+              ...getShadowStyles('sm'),
+            }}>
             <Text style={{
               fontSize: 14,
               fontFamily: theme.fonts.bold,
               color: getColor('foreground'),
+              textAlign: 'center',
             }}>
               ₱{food.price}
             </Text>
+            </View>
           </View>
         </View>
       </CardButton>
@@ -106,4 +129,4 @@ const FoodMenu: React.FC<FoodMenuProps> = ({
   );
 };
 
-export default FoodMenu; 
+export default FoodMenu;

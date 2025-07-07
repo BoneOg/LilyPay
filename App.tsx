@@ -8,7 +8,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import { AdminDashboard } from './src/screens/admin/AdminDashboard';
 import CashierNavigator from './src/navigation/CashierNavigator';
 import * as Font from 'expo-font';
-import AppLoading from 'expo-app-loading';
+import * as SplashScreen from 'expo-splash-screen';
 import { theme } from './src/components/theme';
 
 const customFonts = {
@@ -26,13 +26,22 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
 
   useEffect(() => {
-    loadFonts();
+    async function prepare() {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+        await Font.loadAsync(customFonts);
+      } finally {
+        setFontsLoaded(true);
+      }
+    }
+    prepare();
   }, []);
 
-  const loadFonts = async () => {
-    await Font.loadAsync(customFonts);
-    setFontsLoaded(true);
-  };
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
 
   const handleLogin = (user: any) => {
     setCurrentUser(user);
@@ -43,7 +52,7 @@ export default function App() {
   };
 
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   }
 
   if (!currentUser) {

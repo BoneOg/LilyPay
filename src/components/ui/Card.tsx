@@ -20,7 +20,7 @@ const CardButton: React.FC<CardButtonProps> = ({
         {
           backgroundColor: getColor('card'),
           borderRadius: getBorderRadius('md'),
-          padding: 12,
+          padding: 0,
           height: 160,
           justifyContent: 'center',
           alignItems: 'center',
